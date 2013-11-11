@@ -32,84 +32,103 @@
             return mod;
         };
     }
-    //TODO: Get rid of jquery!
-}(this, "GMods", function() {
+
+}(this, 'GMods', ['jquery'], function($) {
 
 
 
-    /**
-     * Extend method.
-     * @param  {Object} target Source object
-     * @return {Object}        Resulting object from
-     *                         meging target to params.
-     */
-    var _extend = function(target) {
-        var i = 1, length = arguments.length, source;
-        for ( ; i < length; i++ ) {
-            // Only deal with defined values
-            if ((source = arguments[i]) != undefined ){
-                Object.getOwnPropertyNames(source).forEach(function(k){
-                    var d = Object.getOwnPropertyDescriptor(source, k) || {value:source[k]};
-                    if (d.get) {
-                        target.__defineGetter__(k, d.get);
-                        if (d.set) target.__defineSetter__(k, d.set);
-                    } else if (target !== d.value) target[k] = d.value;                
-                });
-            }
-        }
-        return target;
-    };
-
-    /**
-     * Proxy method
-     * @param  {Function} fn      Function to be proxied
-     * @param  {Object}   context Context for the method.
-     */
-    var _proxy = function( fn, context ) {
-        var tmp, args, proxy, slice = Array.prototype.slice;
-
-        if ( typeof context === "string" ) {
-            tmp = fn[ context ];
-            context = fn;
-            fn = tmp;
-        }
-
-        if ( ! typeof(fn) === 'function') return undefined;
-
-        args = slice.call(arguments, 2);
-        proxy = function() {
-            return fn.apply( context || this, args.concat( slice.call( arguments ) ) );
-        };
-
-        return proxy;
-    };
-
+	var _slice = slice = Array.prototype.slice;
 
 ///////////////////////////////////////////////////
 // CONSTRUCTOR
 ///////////////////////////////////////////////////
 	
 	var options = {
-        
+		use:{
+			dom:$,
+        	loader:require
+		},
+        selector:'[data-module]',
+        loader:{
+        	baseUrl:'modules'
+        }
     };
-    
+
     /**
      * GMods constructor
      * 
      * @param  {object} config Configuration object.
      */
     var GMods = function(config){
-        _extend(options, config || {});     
-        this.init();  
+    	this.config = {};    	
+        $.extend(this.config, options, config || {});
+
+        this._extensions = [];
+        // this.initStatus  = deferred();
+        this.initialized = false;
+        // this.init();
     };
 
 ///////////////////////////////////////////////////
-// PRIVATE METHODS
+// PUBLIC METHODS
 ///////////////////////////////////////////////////
+	
+    GMods.prototype.init = function(){
+    	if(this.initialized) return;
 
-     GMods.prototype.init = function(){
+    	//Extend prototype with behaviors
+    	$.extend(GMods.prototype, this.config.use);
+
+    	this.initialized = true;
+
+    	//We depende on $/zepto. We could/should? write wrapper
+    	//to use any engine.
+    	
+
         console.log('GMods: Init!');
+
+        var extensions = this._extensions.slice(0);
+        var initialized = [];
+        var initStatus  = this.initStatus;
+
+        this.collectModules();
         return 'This is just a stub!';
     };
+
+    GMods.prototype.collectModules = function(){
+    	var modules = {},
+    		declarations = this.dom(this.config.selector);
+
+    	//Collect each module from the page.
+    	var $el, el, moduleId, bean;
+    	declarations.each((function(i, item){
+    		el = item;
+    		$el = this.dom(item);
+    		moduleId = $el.data('module');
+    		bean = {id:moduleId, dom:item, el:$el};
+    		modules[bean.id] = bean;		
+    		console.log('We have module "%s" with el: %s and $ as %s', moduleId, el, $el);
+    	}).bind(this));
+
+    	//load
+    	this.loader.config(this.config.loader);
+    	this.loader(Object.keys(modules), function(){
+    		//We have loaded all moudles, initialize them.
+    		var beans = [].slice.call(arguments);
+    		beans.forEach(function(bean){
+    			var id = bean.id;
+    			var config = modules[id];
+    			var module = bean.factory(config);
+    			window[id]=module;
+    		});
+    		
+    		
+    	});
+    };
+
+    GMods.prototype.add = function(ext){
+
+    };
+
     return GMods;
 }));
