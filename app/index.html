@@ -1,0 +1,39 @@
+<!doctype html>
+<!-- paulirish.com/2008/conditional-stylesheets-vs-css-hacks-answer-neither/ -->
+<!--[if lt IE 7]> <html class="no-js lt-ie9 lt-ie8 lt-ie7" lang="en"> <![endif]-->
+<!--[if IE 7]>    <html class="no-js lt-ie9 lt-ie8" lang="en"> <![endif]-->
+<!--[if IE 8]>    <html class="no-js lt-ie9" lang="en"> <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en"> <!--<![endif]-->
+    <head>
+        <meta charset="utf-8">
+        <title>Config Sample</title>
+
+        <!--[if lt IE 9]> HTML5Shiv
+            <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+        <![endif]-->
+
+    </head>
+    <body>
+        <header id="header" class="header" data-module='header'>
+            <nav>
+                <ul>
+                    <li><a href="/home" title="Home">Home</a></li>
+                    <li><a href="/about" title="About">About</a></li>
+                    <li><a href="/contact" title="Contact">Contact</a></li>
+                </ul>
+            </nav>
+        </header><!-- /header -->
+        <div id="sidebar" class='sidebar' data-module='sidebar'>
+            <p>This is a sidebar.</p>
+            <ul>
+                <li><a href="#/someting" >something</a></li>
+            </ul>
+        </div>
+        <div id='content' data-module='content'>
+            <article>
+                <p>This is the content</p>
+            </article>
+        </div>
+    </body>
+    <script src="../requirejs/require.js" data-main="main"></script>
+</html>
