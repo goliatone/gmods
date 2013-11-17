@@ -63,8 +63,7 @@
     	this.config = {};    	
         $.extend(this.config, options, config || {});
 
-        this._extensions = [];
-        // this.initStatus  = deferred();
+        this._modules = {};
         this.initialized = false;
         // this.init();
     };
@@ -83,21 +82,13 @@
 
     	//We depende on $/zepto. We could/should? write wrapper
     	//to use any engine.
-    	
-
         console.log('GMods: Init!');
-
-        var extensions = this._extensions.slice(0);
-        var initialized = [];
-        var initStatus  = this.initStatus;
-
         this.collectModules();
         return 'This is just a stub!';
     };
 
     GMods.prototype.collectModules = function(){
-    	var modules = {},
-    		declarations = this.dom(this.config.selector);
+    	var declarations = this.dom(this.config.selector);
 
     	//Collect each module from the page.
     	var $el, el, moduleId, bean;
@@ -106,28 +97,26 @@
     		$el = this.dom(item);
     		moduleId = $el.data('module');
     		bean = {id:moduleId, dom:item, el:$el};
-    		modules[bean.id] = bean;		
+    		this._modules[bean.id] = bean;		
     		console.log('We have module "%s" with el: %s and $ as %s', moduleId, el, $el);
     	}).bind(this));
 
     	//load
     	this.loader.config(this.config.loader);
-    	this.loader(Object.keys(modules), function(){
-    		//We have loaded all moudles, initialize them.
-    		var beans = [].slice.call(arguments);
-    		beans.forEach(function(bean){
-    			var id = bean.id;
-    			var config = modules[id];
-    			var module = bean.factory(config);
-    			window[id]=module;
-    		});
-    		
-    		
-    	});
+    	this.loader(Object.keys(this._modules), this.onModulesLoaded.bind(this));
     };
 
-    GMods.prototype.add = function(ext){
+    GMods.prototype.onModulesLoaded = function(){
+    	//We have loaded all moudles, initialize them.
+		var beans = [].slice.call(arguments);
+		beans.forEach((this.add).bind(this));
+    };
 
+    GMods.prototype.add = function(bean){
+    	var id = bean.id;
+		var config = this._modules[id];
+		var module = bean.factory(config);
+		window[id]=bean;
     };
 
     return GMods;
