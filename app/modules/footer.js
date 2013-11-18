@@ -1,27 +1,26 @@
-define('header',['jquery'], function($){
+define('footer',['jquery'], function($){
 
-	var Header = function(config){
+	var Footer = function(config){
 		this.init(config);
 	};
-	Header.id = 'header';
-	Header.prototype.init = function(config){
+	Footer.id = 'footer';
+	
+	Footer.prototype.init = function(config){
 		this.config = config;
 		console.log(this.constructor.id, ' initialized ', config );
 		config.el.find('a').each(function(){
 			console.log(this.href)
 			$(this).on('click',function(e){
-				e.preventDefault();
-				$(this).closest('.nav').find('.active').removeClass('active');
-				$(this).parent().addClass('active');	
+				e.preventDefault();			
 				console.log('SOmething happende!', e, e.currentTarget.pathname);
 				$(window).trigger('navigate', [{url:e.currentTarget.pathname.replace('/','')}]);
 			});
-			$('.dropdown-toggle').dropdown();
+			
 		});
 	};
 	//This is the module's interface with the loader.
 	return {
-		id:'header',
+		id:'footer',
 		init:function(){
 			console.log(this.id);
 		},
@@ -30,7 +29,7 @@ define('header',['jquery'], function($){
 			//have more than one instance, or only one
 			//per app? Instead of doing a singleton, 
 			//we manage this internally.
-			return new Header(config);
+			return new Footer(config);
 		}
 	};
 });
