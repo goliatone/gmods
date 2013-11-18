@@ -64,6 +64,8 @@
         $.extend(this.config, options, config || {});
 
         this._modules = {};
+        this._definitions = {};
+
         this.initialized = false;
         // this.init();
     };
@@ -80,7 +82,7 @@
 
     	this.initialized = true;
 
-    	//We depende on $/zepto. We could/should? write wrapper
+    	//We depend on $/zepto. We could/should? write wrapper
     	//to use any engine.
         console.log('GMods: Init!');
         this.collectModules();
@@ -97,24 +99,27 @@
     		$el = this.dom(item);
     		moduleId = $el.data('module');
     		bean = {id:moduleId, dom:item, el:$el};
-    		this._modules[bean.id] = bean;		
+    		this._definitions[bean.id] = bean;		
     		console.log('We have module "%s" with el: %s and $ as %s', moduleId, el, $el);
     	}).bind(this));
 
     	//load
     	this.loader.config(this.config.loader);
-    	this.loader(Object.keys(this._modules), this.onModulesLoaded.bind(this));
+    	this.loader(Object.keys(this._definitions), this.onModulesLoaded.bind(this));
     };
 
     GMods.prototype.onModulesLoaded = function(){
-    	//We have loaded all moudles, initialize them.
+    	//We have loaded all modules, initialize them.
 		var beans = [].slice.call(arguments);
 		beans.forEach((this.add).bind(this));
     };
 
     GMods.prototype.add = function(bean){
     	var id = bean.id;
-		var config = this._modules[id];
+		var config = this._definitions[id];
+		this._modules[id] = bean;
+		
+		//This 
 		var module = bean.factory(config);
 		window[id]=bean;
     };
